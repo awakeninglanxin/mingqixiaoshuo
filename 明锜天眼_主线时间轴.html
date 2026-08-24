@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>明锜天眼 · 主线时间轴</title>
+<style>
+  :root {
+    --bg0: #070a1f;
+    --bg1: #0d1233;
+    --bg2: #141a4a;
+    --gold: #f5c86a;
+    --gold-soft: #ffdf9e;
+    --lavender: #b8a8e8;
+    --blue: #7fb4ff;
+    --cyan: #8fe3e8;
+    --text: #e8e6ff;
+    --text-dim: #a8a4d0;
+    --line: rgba(245, 200, 106, 0.25);
+    --card-bg: rgba(20, 26, 74, 0.55);
+    --card-border: rgba(245, 200, 106, 0.18);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: radial-gradient(ellipse at 50% -10%, #1b2358 0%, var(--bg0) 55%, #04061a 100%);
+    color: var(--text);
+    font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.7;
+  }
+  /* ===== 星空 ===== */
+  .stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  .star {
+    position: absolute; border-radius: 50%;
+    background: #fff;
+    animation: twinkle var(--dur, 4s) ease-in-out infinite;
+    opacity: 0;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; transform: scale(0.6); }
+    50% { opacity: var(--op, 0.9); transform: scale(1); }
+  }
+  .glow-orb {
+    position: fixed; border-radius: 50%; filter: blur(90px); z-index: 0; pointer-events: none; opacity: 0.35;
+  }
+  .orb1 { width: 420px; height: 420px; background: #4a3f9e; top: -120px; right: -80px; }
+  .orb2 { width: 380px; height: 380px; background: #2c4a8e; bottom: -100px; left: -100px; }
+  .orb3 { width: 260px; height: 260px; background: #8a5a2e; top: 45%; left: 55%; opacity: 0.18; }
+
+  .wrap { position: relative; z-index: 1; max-width: 1060px; margin: 0 auto; padding: 60px 24px 90px; }
+
+  /* ===== 头部 ===== */
+  header { text-align: center; margin-bottom: 64px; }
+  .title {
+    font-size: clamp(30px, 5vw, 52px);
+    font-weight: 800;
+    letter-spacing: 6px;
+    background: linear-gradient(135deg, var(--gold-soft) 0%, var(--gold) 40%, #fff3d6 70%, var(--gold) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    text-shadow: 0 0 60px rgba(245, 200, 106, 0.25);
+  }
+  .subtitle { color: var(--lavender); font-size: 15px; letter-spacing: 8px; margin-top: 14px; opacity: 0.9; }
+  .tagline {
+    margin: 26px auto 0; max-width: 720px;
+    color: var(--text-dim); font-size: 15px; line-height: 2;
+  }
+  .tagline b { color: var(--gold-soft); font-weight: 600; }
+
+  /* ===== 章节标题 ===== */
+  .section-label {
+    display: flex; align-items: center; gap: 14px;
+    margin: 70px 0 8px;
+    font-size: 13px; letter-spacing: 5px; color: var(--gold); text-transform: uppercase;
+  }
+  .section-label::before, .section-label::after { content: ""; height: 1px; flex: 1; background: linear-gradient(90deg, transparent, var(--line)); }
+  .section-label::after { background: linear-gradient(90deg, var(--line), transparent); }
+
+  /* ===== 时间轴 ===== */
+  .timeline { position: relative; padding: 20px 0; }
+  .timeline::before {
+    content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
+    background: linear-gradient(180deg, transparent, var(--line) 8%, var(--line) 92%, transparent);
+    transform: translateX(-50%);
+  }
+  .item {
+    position: relative; width: 50%; padding: 0 44px 46px;
+  }
+  .item.left { left: 0; text-align: right; }
+  .item.right { left: 50%; text-align: left; }
+  .dot {
+    position: absolute; top: 6px; width: 16px; height: 16px; border-radius: 50%;
+    background: radial-gradient(circle, #fff7e0 0%, var(--gold) 60%, #a8781f 100%);
+    box-shadow: 0 0 18px rgba(245, 200, 106, 0.9), 0 0 42px rgba(245, 200, 106, 0.4);
+    z-index: 2;
+  }
+  .item.left .dot { right: -9px; }
+  .item.right .dot { left: -7px; }
+  .season-tag {
+    display: inline-block; font-size: 12px; letter-spacing: 2px;
+    color: #0a0e2a; background: linear-gradient(120deg, var(--gold-soft), var(--gold));
+    padding: 3px 12px; border-radius: 20px; font-weight: 700; margin-bottom: 10px;
+  }
+  .card {
+    display: inline-block; text-align: left;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px; padding: 20px 22px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 0 30px rgba(140, 120, 255, 0.04);
+    transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
+    max-width: 100%;
+  }
+  .item:hover .card {
+    transform: translateY(-4px);
+    border-color: rgba(245, 200, 106, 0.5);
+    box-shadow: 0 14px 44px rgba(0, 0, 0, 0.45), 0 0 34px rgba(245, 200, 106, 0.12);
+  }
+  .card h3 { color: var(--gold-soft); font-size: 19px; letter-spacing: 1px; margin-bottom: 6px; }
+  .card .theme { color: var(--cyan); font-size: 13px; letter-spacing: 2px; margin-bottom: 10px; }
+  .card p { color: var(--text-dim); font-size: 13.5px; }
+  .card p b { color: var(--text); font-weight: 600; }
+  .ep { color: var(--blue); font-size: 12px; letter-spacing: 1px; margin-top: 10px; opacity: 0.85; }
+
+  /* ===== 修行时间线（横向条） ===== */
+  .cultivation { margin-top: 24px; }
+  .cult-strip {
+    display: flex; align-items: stretch; gap: 0; margin-top: 18px;
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: 14px; overflow: hidden; backdrop-filter: blur(8px);
+  }
+  .cult-seg {
+    flex: 1; padding: 16px 12px; text-align: center;
+    border-right: 1px solid rgba(245, 200, 106, 0.12);
+    transition: background .3s ease;
+    position: relative;
+  }
+  .cult-seg:last-child { border-right: none; }
+  .cult-seg:hover { background: rgba(245, 200, 106, 0.08); }
+  .cult-age { font-size: 13px; font-weight: 800; color: var(--gold); letter-spacing: 1px; }
+  .cult-ev { font-size: 12px; color: var(--text); margin-top: 4px; }
+  .cult-fruit { font-size: 11px; color: var(--lavender); margin-top: 6px; line-height: 1.5; }
+  .cult-seg::after {
+    content: ""; position: absolute; left: 50%; bottom: -1px; transform: translateX(-50%);
+    width: 0; height: 3px; background: linear-gradient(90deg, var(--gold), var(--gold-soft));
+    transition: width .35s ease; border-radius: 3px;
+  }
+  .cult-seg:hover::after { width: 80%; }
+  .legend { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 16px; color: var(--text-dim); font-size: 12.5px; }
+  .legend span b { color: var(--gold-soft); }
+
+  /* ===== 三线贯穿 ===== */
+  .threads { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin-top: 20px; }
+  .thread {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: 14px; padding: 20px 22px; backdrop-filter: blur(8px);
+    transition: transform .3s ease, border-color .3s ease;
+  }
+  .thread:hover { transform: translateY(-4px); border-color: rgba(245, 200, 106, 0.45); }
+  .thread .t-name { font-size: 16px; font-weight: 700; letter-spacing: 2px; margin-bottom: 12px; }
+  .thread.t1 .t-name { color: var(--gold); }
+  .thread.t2 .t-name { color: var(--cyan); }
+  .thread.t3 .t-name { color: var(--lavender); }
+  .thread ol { padding-left: 20px; color: var(--text-dim); font-size: 13px; }
+  .thread ol li { margin-bottom: 6px; }
+  .thread ol li b { color: var(--text); font-weight: 600; }
+
+  /* ===== 终局 ===== */
+  .finale {
+    margin-top: 64px; text-align: center;
+    background:
+      radial-gradient(ellipse at 50% 120%, rgba(245, 200, 106, 0.14), transparent 60%),
+      var(--card-bg);
+    border: 1px solid rgba(245, 200, 106, 0.3);
+    border-radius: 18px; padding: 44px 30px;
+    backdrop-filter: blur(10px);
+  }
+  .finale h2 { font-size: 26px; letter-spacing: 4px; color: var(--gold-soft); margin-bottom: 18px; }
+  .finale p { color: var(--text-dim); font-size: 14.5px; max-width: 720px; margin: 0 auto 10px; }
+  .finale p b { color: var(--gold); }
+  .quote {
+    margin-top: 26px; font-size: 16px; color: var(--text);
+    font-style: italic; letter-spacing: 1px;
+  }
+  .quote::before, .quote::after { content: "「"; color: var(--gold); opacity: 0.7; }
+  .quote::after { content: "」"; }
+
+  footer { text-align: center; margin-top: 56px; color: rgba(168, 164, 208, 0.5); font-size: 12px; letter-spacing: 2px; }
+
+  /* ===== 响应式 ===== */
+  @media (max-width: 760px) {
+    .timeline::before { left: 10px; }
+    .item { width: 100%; padding: 0 0 38px 40px; text-align: left !important; }
+    .item.left, .item.right { left: 0; }
+    .item .dot { left: 2px !important; right: auto !important; }
+    .card { text-align: left; }
+    .cult-strip { flex-direction: column; }
+    .cult-seg { border-right: none; border-bottom: 1px solid rgba(245, 200, 106, 0.12); }
+    .cult-seg:last-child { border-bottom: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="glow-orb orb1"></div>
+<div class="glow-orb orb2"></div>
+<div class="glow-orb orb3"></div>
+
+<div class="wrap">
+
+  <header>
+    <div class="title">明 锜 天 眼</div>
+    <div class="subtitle">THE EYE OF MINGQI · 72集六季主线时间轴</div>
+    <p class="tagline">
+      一个富二代少年，在天眼觉醒后看穿了<b>物质、能量与修行</b>的底层是同一条数学。
+      于是他把<b>科技、修行、星际</b>三条线拧成一股，最终把全人类带向<b>人人修真</b>的时代。
+    </p>
+  </header>
+
+  <!-- ===== 六季主线 ===== -->
+  <div class="section-label">六 季 主 线</div>
+  <div class="timeline">
+
+    <div class="item left">
+      <div class="dot"></div>
+      <div class="card">
+        <span class="season-tag">S1 · 1-12集</span>
+        <h3>天眼初开</h3>
+        <div class="theme">看见</div>
+        <p>28岁天眼觉醒，看见能量网格与物质本质；组建团队，造出<b>永久电池</b>与<b>SEG反重力引擎</b>；37岁归山闭关<b>初结丹</b>——金丹点亮，不死之始。</p>
+        <div class="ep">Ep1 逆M水滴 → Ep10 永久电池 → Ep12 结丹不死</div>
+      </div>
+    </div>
+
+    <div class="item right">
+      <div class="dot"></div>
+      <div class="card">
+        <span class="season-tag">S2 · 13-24集</span>
+        <h3>从晶格到ANU</h3>
+        <div class="theme">理解</div>
+        <p>苏晶用数学穷尽<b>230种空间群</b>（三重极限）；明锜天眼与元光肉眼通<b>两条独立路径</b>看同一个世界——直抵ANU的心形空腔与<b>1680螺旋</b>；晶格编译器问世。</p>
+        <div class="ep">Ep15 1680四重面孔 → Ep20 晶格编译器 → Ep24 ANU心形空腔</div>
+      </div>
+    </div>
+
+    <div class="item left">
+      <div class="dot"></div>
+      <div class="card">
+        <span class="season-tag">S3 · 25-36集</span>
+        <h3>零点能时代</h3>
+        <div class="theme">超越</div>
+        <p>超COP引擎突破能量认知；<b>"暗能量=物理bug"</b>，正名零点能；SEG量产、家用Q单元、高压电网退役；AHCS蓝图（12进制·金星体系）现世。</p>
+        <div class="ep">Ep26 90°相位差 → Ep29 暗能量是bug → Ep36 AHCS蓝图</div>
+      </div>
+    </div>
+
+    <div class="item right">
+      <div class="dot"></div>
+      <div class="card">
+        <span class="season-tag">S4 · 37-48集</span>
+        <h3>AHCS觉醒</h3>
+        <div class="theme">创造</div>
+        <p><b>AHCS全息量子计算机</b>上线（四路并行），ROSC伊辛机=天眼通的硬件；能量打印、因果实验室、蛋形住宅；48集明锜昴宿山巅<b>使命宣告</b>。</p>
+        <div class="ep">Ep37 AHCS上线 → Ep39 能量打印 → Ep48 使命结晶</div>
+      </div>
+    </div>
+
+    <div class="item left">
+      <div class="dot"></div>
+      <div class="card">
+        <span class="season-tag">S5 · 49-60集</span>
+        <h3>法器纪元</h3>
+        <div class="theme">法器</div>
+        <p>九品法器体系——<b>法器=类似SEG接入零点能的意识放大器</b>（水晶压电核·零点能→意识频率放大→定向输出·法器空寂不站队）。归零钵超度、古战场送行、<b>河图洛书</b>现世。</p>
+        <div class="ep">Ep49 九品法器 → Ep54 第一场超度 → Ep60 河图洛书</div>
+      </div>
+    </div>
+
+    <div class="item right">
+      <div class="dot"></div>
+      <div class="card">
+        <span class="season-tag">S6 · 61-72集</span>
+        <h3>层级征服</h3>
+        <div class="theme">归零</div>
+        <p>以河图洛书为地图、四句偈为注脚，逐级征服七级浮屠前四级：<b>地月系→太阳系→银河系→佛国世界</b>。72集明锜<b>归零证道</b>——归零亦是开始。</p>
+        <div class="ep">Ep62 三星堆 → Ep66 超度学院 → Ep72 归零·人人皆桥</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== 明锜修行时间线 ===== -->
+  <div class="section-label">明 锜 修 行 时 间 线</div>
+  <div class="cultivation">
+    <div class="cult-strip">
+      <div class="cult-seg">
+        <div class="cult-age">28岁</div>
+        <div class="cult-ev">觉醒天眼</div>
+        <div class="cult-fruit">初果开始（身位）</div>
+      </div>
+      <div class="cult-seg">
+        <div class="cult-age">31岁</div>
+        <div class="cult-ev">初果圆满</div>
+        <div class="cult-fruit">身位三年·须陀洹</div>
+      </div>
+      <div class="cult-seg">
+        <div class="cult-age">34岁</div>
+        <div class="cult-ev">二果圆满</div>
+        <div class="cult-fruit">心位三年·斯陀含</div>
+      </div>
+      <div class="cult-seg">
+        <div class="cult-age">34-37</div>
+        <div class="cult-ev">入世建团队</div>
+        <div class="cult-fruit">电池·SEG·星门</div>
+      </div>
+      <div class="cult-seg">
+        <div class="cult-age">37岁</div>
+        <div class="cult-ev">三果初开·初结丹</div>
+        <div class="cult-fruit">48根DNA·24对染色体</div>
+      </div>
+      <div class="cult-seg">
+        <div class="cult-age">40岁</div>
+        <div class="cult-ev">三果圆满</div>
+        <div class="cult-fruit">结金丹圆满·金仙·60万年</div>
+      </div>
+      <div class="cult-seg">
+        <div class="cult-age">43岁</div>
+        <div class="cult-ev">元婴出关</div>
+        <div class="cult-fruit">四果罗汉圆满·十五仙窍·全知全觉</div>
+      </div>
+    </div>
+    <div class="legend">
+      <span>📐 <b>数学路径</b>：230空间群 = X射线衍射+电镜+群论三重极限</span>
+      <span>👁 <b>灵视路径</b>：肉眼通 = 四六通达·人人本具·精气神=灯泡亮度</span>
+      <span>🧬 <b>DNA</b>：46出厂 → 48初结丹 → 52 → 64 → 72元婴</span>
+    </div>
+  </div>
+
+  <!-- ===== 三线贯穿 ===== -->
+  <div class="section-label">三 线 贯 穿</div>
+  <div class="threads">
+    <div class="thread t1">
+      <div class="t-name">⚡ 科技线</div>
+      <ol>
+        <li>永久电池（五金店材料可造）</li>
+        <li><b>SEG</b> 三环磁涡旋 · 90°相位差自持</li>
+        <li>零点能 · 家用Q单元 · 电网退役</li>
+        <li><b>AHCS</b> · 纳米SEG·钻石玻璃CPU</li>
+        <li>河图洛书 · 层级地图</li>
+      </ol>
+    </div>
+    <div class="thread t2">
+      <div class="t-name">🧘 修行线</div>
+      <ol>
+        <li>三次觉醒（出窍·濒死·五教归一）</li>
+        <li>初果 → 二果 → 三果（金丹）</li>
+        <li><b>元婴</b>（四果罗汉·全知全觉）</li>
+        <li>七级浮屠 · 向内回归</li>
+        <li>归零 · <b>无量寿</b> · 神仙伴侣</li>
+      </ol>
+    </div>
+    <div class="thread t3">
+      <div class="t-name">🪐 星际线</div>
+      <ol>
+        <li>星门网络 · 156地球脉轮</li>
+        <li>昴宿二 · 星际种族13家</li>
+        <li>三星堆 = 天狼星轮值站</li>
+        <li>银河系 → 佛国世界 · 层级征服</li>
+        <li>空心地球 · 特斯拉分灵 · 蓝鲸DNA备份</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ===== 终局 ===== -->
+  <div class="finale">
+    <h2>终局 · 归零亦是开始</h2>
+    <p>明锜<b>归零证道</b>——放下"桥"的身份，把河图洛书交给每个人。</p>
+    <p>人类进入<b>服空时代</b>：蛋形社区 · 碳硅转化 · 身体内SEG中脉充能 · 能源自由元年。</p>
+    <p>明锜与静慈——夫妻并肩走完七级浮屠，<b>神仙伴侣 · 无量寿</b>（不生不灭）。</p>
+    <p>彩蛋：空心地球 · 特斯拉分灵 · 元光之师 · 蓝鲸=人类DNA备份 · 九星汇聚。</p>
+    <div class="quote">归零，才能重新出发。归零，才有创新。</div>
+  </div>
+
+  <footer>明锜天眼 · 六季72集 · 看见 → 理解 → 超越 → 创造 → 法器 → 归零</footer>
+</div>
+
+<script>
+  // 生成星光
+  (function () {
+    var stars = document.getElementById('stars');
+    for (var i = 0; i < 110; i++) {
+      var s = document.createElement('div');
+      s.className = 'star';
+      var size = (Math.random() * 2 + 0.6).toFixed(1);
+      s.style.width = size + 'px';
+      s.style.height = size + 'px';
+      s.style.left = (Math.random() * 100).toFixed(2) + '%';
+      s.style.top = (Math.random() * 100).toFixed(2) + '%';
+      s.style.setProperty('--dur', (Math.random() * 5 + 2.5).toFixed(1) + 's');
+      s.style.setProperty('--op', (Math.random() * 0.7 + 0.3).toFixed(2));
+      s.style.animationDelay = (Math.random() * 6).toFixed(1) + 's';
+      stars.appendChild(s);
+    }
+  })();
+
+  // 滚动淡入
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.item, .thread, .finale').forEach(function (el, i) {
+    el.style.opacity = '0';
+    el.style.transition = 'opacity .7s ease ' + (i * 0.05) + 's, transform .7s ease';
+    el.style.transform = 'translateY(24px)';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
